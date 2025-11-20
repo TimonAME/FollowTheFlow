@@ -18,6 +18,7 @@ const inputString = ref("")
 const waitingForInput = ref(false)
 const roundWonInfo = ref(false)
 const roundLostInfo = ref(false)
+const resetting = ref(false)
 
 function createGameString() {
   gameString = ""
@@ -25,50 +26,38 @@ function createGameString() {
     let rand = Math.floor(Math.random() * 4);
     gameString += templateString[rand]
   }
-  console.log("Game String created:" + gameString);
+  console.log("Game String created: " + gameString);
 }
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowUp') {
-    console.log('ArrowUp detected')
-
     if (waitingForInput.value) {
       addToInputString("U")
       glow("U")
     }
   }
   else if (e.key === 'ArrowRight') {
-    console.log('ArrowRight detected')
-
     if (waitingForInput.value) {
       addToInputString("R")
       glow("R")
     }
   }
   else if (e.key === 'ArrowDown') {
-    console.log('ArrowDown detected')
-
     if (waitingForInput.value) {
       addToInputString("D")
       glow("D")
     }
   }
   else if (e.key === 'ArrowLeft') {
-    console.log('ArrowLeft detected')
-
     if (waitingForInput.value) {
       addToInputString("L")
       glow("L")
     }
   }
   else if (e.key === 'Enter') {
-    console.log('Enter detected')
-
     if (!waitingForInput.value) loadGameString()
   }
   else if (e.key === 'r') {
-    console.log('R detected')
-
     resetGame()
   }
 })
@@ -101,7 +90,9 @@ function glow(direction) {
 }
 
 function loadGameString() {
+  resetGame()
   if (waitingForInput.value) return;
+  resetting.value = false
 
   inputString.value = ''
   roundWonInfo.value = false
@@ -109,14 +100,19 @@ function loadGameString() {
 
   let instructions = gameString.split('')
 
+  let timeouts = [];
   instructions.forEach((item, index) => {
-    setTimeout(() => {
-      console.log(item)
-      glow(item)
-    }, 500 * index)
-  })
+    const id = setTimeout(() => {
+      if (resetting.value) return;
+      console.log(item);
+      glow(item);
+    }, 500 * index);
+
+    timeouts.push(id);
+  });
 
   setTimeout(() => {
+    if (resetting.value) return; // for reset during show of input
     waitingForInput.value = true
   }, 500*instructions.length)
 }
@@ -125,13 +121,11 @@ function addToInputString(input) {
   inputString.value += input
 
   if (inputString.value.length === gameString.length) {
-    console.log("Input Complete")
     waitingForInput.value = false
 
     if (inputString.value !== gameString ) {
       console.log("Game Over")
       roundLostInfo.value = true
-      resetGame()
     } else {
       console.log("Round Won")
       roundWonInfo.value = true
@@ -151,6 +145,8 @@ function returnToLobby() {
 }
 
 function resetGame() {
+  resetting.value = true // initiate reset (info for other functions)
+
   round.value = 1
   inputString.value = ''
   gameString = ''
@@ -160,13 +156,14 @@ function resetGame() {
 
 onMounted(() => {
   resetGame()
+  resetting.value = false
 })
 </script>
 
 <template>
   <div class="w-screen h-screen overflow-hidden flex justify-center flex-col items-center">
     <div>
-      <button class="p-2 text-sm border-white border-2 rounded hover:shadow-xl/20 shadow-white" @click="returnToLobby">Return to lobby</button>
+      <button class="p-2 text-sm border-white border-2 rounded hover:shadow-xl/20 shadow-white cursor-pointer" @click="returnToLobby">Return to lobby</button>
       <div class="text-sm text-gray-500">press R to Restart</div>
       <div class="flex flex-col text-end my-6">
         <div>{{ round }} - Round</div>
@@ -174,34 +171,38 @@ onMounted(() => {
       <div class="p-5 w-fit mx-auto">
         <div class="rotate-45">
           <div class="flex">
-            <div @click="glow('U'); addToInputString('U')" :class="{glowUp: upAnimation}" class="w-24 h-24 bg-red-400 opacity-30 hover:opacity-100 rounded-tl-full hover:shadow-[0px_0px_50px_15px_#ff6467] hover:z-0">
+            <div @click="glow('U'); addToInputString('U')" :class="{glowUp: upAnimation, 'hover:shadow-[0px_0px_50px_15px_#ff6467] hover:opacity-100': waitingForInput}" class="w-24 h-24 bg-red-400 opacity-30  rounded-tl-full hover:z-0">
               <ArrowIcon class="-rotate-135"/>
             </div>
-            <div @click="glow('R'); addToInputString('R')" :class="{glowRight: rightAnimation}" class="w-24 h-24 bg-blue-400 opacity-30 hover:opacity-100 rounded-tr-full hover:shadow-[0px_0px_50px_15px_#50a2ff] hover:z-0">
+            <div @click="glow('R'); addToInputString('R')" :class="{glowRight: rightAnimation, 'hover:shadow-[0px_0px_50px_15px_#50a2ff] hover:opacity-100': waitingForInput}" class="w-24 h-24 bg-blue-400 opacity-30 rounded-tr-full hover:z-0">
               <ArrowIcon class="-rotate-45 ml-18"/>
             </div>
           </div>
           <div class="flex rotate-180 justify-end">
-            <div @click="glow('D'); addToInputString('D')" :class="{glowDown: downAnimation}" class="w-24 h-24 bg-green-400 opacity-30 hover:opacity-100 rounded-tl-full hover:shadow-[0px_0px_50px_15px_#05df72] hover:z-0">
+            <div @click="glow('D'); addToInputString('D')" :class="{glowDown: downAnimation, 'hover:shadow-[0px_0px_50px_15px_#05df72] hover:opacity-100': waitingForInput}" class="w-24 h-24 bg-green-400 opacity-30 rounded-tl-full hover:z-0">
               <ArrowIcon class="-rotate-135"/>
             </div>
-            <div @click="glow('L'); addToInputString('L')" :class="{glowLeft: leftAnimation}" class="w-24 h-24 bg-yellow-400 opacity-30 hover:opacity-100 rounded-tr-full hover:shadow-[0px_0px_50px_15px_#fdc700] hover:z-0">
+            <div @click="glow('L'); addToInputString('L')" :class="{glowLeft: leftAnimation, 'hover:shadow-[0px_0px_50px_15px_#fdc700] hover:opacity-100': waitingForInput}" class="w-24 h-24 bg-yellow-400 opacity-30 rounded-tr-full hover:z-0">
               <ArrowIcon class="-rotate-45 ml-18"/>
             </div>
           </div>
         </div>
       </div>
       <div class="mt-16 mx-auto text-center">
-        <button v-if="!waitingForInput" @click="loadGameString" class="p-4 border-white border-2 rounded hover:hover:shadow-[0px_0px_50px_8px_#ffffff] shadow-white transition-shadow">{{ round === 1 ? 'Start Game':'Next Round' }}</button>
+        <button v-if="!waitingForInput" @click="loadGameString" class="p-4 border-white border-2 rounded hover:hover:shadow-[0px_0px_50px_8px_#ffffff] shadow-white transition-shadow" :class="{'animate-pulse': round === 1}">{{ round === 1 ? 'Start Game':'Next Round' }}</button>
         <div  v-if="!waitingForInput" class="text-sm text-gray-500">or press ENTER</div>
         <button v-else class="p-4 border-white border-2 rounded shadow-xl/20 shadow-white">Game in Progress</button>
       </div>
     </div>
 
+    <!-- Infos -->
     <div class="text-lg mt-16">Log:<span class="animate-pulse">_</span>{{ inputString }}</div>
     <div v-if="roundWonInfo" class="text-lg text-green-400 animate-pulse">ROUND WON</div>
+    <div v-else class="text-lg invisible">.</div><!-- damit sich nicht alles verschiebt -->
     <div v-if="roundLostInfo" class="text-lg text-red-400 animate-pulse">ROUND LOST</div>
-    <div v-else></div>
+    <div v-else class="text-lg invisible">.</div>
+    <div v-if="resetting" class="text-lg text-yellow-400 animate-pulse">GAME RESETTED</div>
+    <div v-else class="text-lg invisible">.</div>
   </div>
 </template>
 
