@@ -1,41 +1,13 @@
-# vuejs-base
+# Simon says
+4 Felder, ein Feld leuchtet zufällig auf, user muss es sich merken und die reihenfolge der Fleder korrekt wiedergeben
+anzahl an aufleuchtenden Feldern steigt
 
-This template should help get you started developing with Vue 3 in Vite.
+## Start Screen:
+- press space to start
+- Logo
+- Image of the circle
 
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+## Game Screen
+- score in a corner
+- circle with 4 parts in the middle
+- arrow keys input available

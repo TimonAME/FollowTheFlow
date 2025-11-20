@@ -1,11 +1,10 @@
-<script setup></script>
+<script setup>
+</script>
 
 <template>
-  <h1 class="text-xl font-bold text-blue-800">You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <main class="bg-[#1e1f22] text-white font-[Orbitron] select-none">
+    <RouterView />
+  </main>
 </template>
 
 <style scoped></style>
