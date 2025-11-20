@@ -19,6 +19,7 @@ const waitingForInput = ref(false)
 const roundWonInfo = ref(false)
 const roundLostInfo = ref(false)
 const resetting = ref(false)
+const inputLoading = ref(false)
 
 function createGameString() {
   gameString = ""
@@ -57,6 +58,7 @@ function glow(direction) {
 }
 
 function loadGameString() {
+  inputLoading.value = true
   resetGame()
   if (waitingForInput.value) return;
   resetting.value = false
@@ -80,6 +82,7 @@ function loadGameString() {
   setTimeout(() => {
     if (resetting.value) return; // for reset during show of input
     waitingForInput.value = true
+    inputLoading.value = false
   }, 500*instructions.length)
 }
 
@@ -150,7 +153,7 @@ onMounted(() => {
       }
     }
     else if (e.key === 'Enter') {
-      if (!waitingForInput.value) loadGameString()
+      if (!waitingForInput.value && !inputLoading.value) loadGameString()
     }
     else if (e.key === 'r') {
       resetGame()
@@ -196,8 +199,8 @@ onUnmounted(() => {
       </div>
       <div class="mt-16 mx-auto text-center">
         <button v-if="!waitingForInput" @click="loadGameString" class="p-4 border-white border-2 rounded hover:hover:shadow-[0px_0px_50px_8px_#ffffff] shadow-white transition-shadow" :class="{'animate-pulse': round === 1}">{{ round === 1 ? 'Start Game':'Next Round' }}</button>
-        <div  v-if="!waitingForInput" class="text-sm text-gray-500">or press ENTER</div>
-        <button v-else class="p-4 border-white border-2 rounded shadow-xl/20 shadow-white">Game in Progress</button>
+        <div  v-if="!waitingForInput && !inputLoading" class="text-sm text-gray-500">or press ENTER</div>
+        <button v-if="waitingForInput" class="p-4 border-white border-2 rounded shadow-xl/20 shadow-white">Game in Progress</button>
       </div>
     </div>
 
