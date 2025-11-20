@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ArrowIcon from '@/components/ArrowIcon.vue'
 
@@ -28,39 +28,6 @@ function createGameString() {
   }
   console.log("Game String created: " + gameString);
 }
-
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowUp') {
-    if (waitingForInput.value) {
-      addToInputString("U")
-      glow("U")
-    }
-  }
-  else if (e.key === 'ArrowRight') {
-    if (waitingForInput.value) {
-      addToInputString("R")
-      glow("R")
-    }
-  }
-  else if (e.key === 'ArrowDown') {
-    if (waitingForInput.value) {
-      addToInputString("D")
-      glow("D")
-    }
-  }
-  else if (e.key === 'ArrowLeft') {
-    if (waitingForInput.value) {
-      addToInputString("L")
-      glow("L")
-    }
-  }
-  else if (e.key === 'Enter') {
-    if (!waitingForInput.value) loadGameString()
-  }
-  else if (e.key === 'r') {
-    resetGame()
-  }
-})
 
 function glow(direction) {
   if (direction === 'U') {
@@ -104,7 +71,6 @@ function loadGameString() {
   instructions.forEach((item, index) => {
     const id = setTimeout(() => {
       if (resetting.value) return;
-      console.log(item);
       glow(item);
     }, 500 * index);
 
@@ -157,13 +123,53 @@ function resetGame() {
 onMounted(() => {
   resetGame()
   resetting.value = false
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp') {
+      if (waitingForInput.value) {
+        addToInputString("U")
+        glow("U")
+      }
+    }
+    else if (e.key === 'ArrowRight') {
+      if (waitingForInput.value) {
+        addToInputString("R")
+        glow("R")
+      }
+    }
+    else if (e.key === 'ArrowDown') {
+      if (waitingForInput.value) {
+        addToInputString("D")
+        glow("D")
+      }
+    }
+    else if (e.key === 'ArrowLeft') {
+      if (waitingForInput.value) {
+        addToInputString("L")
+        glow("L")
+      }
+    }
+    else if (e.key === 'Enter') {
+      if (!waitingForInput.value) loadGameString()
+    }
+    else if (e.key === 'r') {
+      resetGame()
+    }
+  })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', () => {}) // funktioniert leider nicht
 })
 </script>
 
 <template>
   <div class="w-screen h-screen overflow-hidden flex justify-center flex-col items-center">
     <div>
-      <button class="p-2 text-sm border-white border-2 rounded hover:shadow-xl/20 shadow-white cursor-pointer" @click="returnToLobby">Return to lobby</button>
+      <div class="flex flex-wrap gap-2">
+        <button class="p-2 text-sm border-white border-2 rounded hover:shadow-xl/20 shadow-white cursor-pointer" @click="resetGame">Restart</button>
+        <button class="p-2 text-sm border-white border rounded hover:shadow-xl/20 shadow-white cursor-pointer" @click="returnToLobby">Return to lobby</button>
+      </div>
       <div class="text-sm text-gray-500">press R to Restart</div>
       <div class="flex flex-col text-end my-6">
         <div>{{ round }} - Round</div>
@@ -195,8 +201,9 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Infos -->
     <div class="text-lg mt-16">Log:<span class="animate-pulse">_</span>{{ inputString }}</div>
+
+    <!-- Infos -->
     <div v-if="roundWonInfo" class="text-lg text-green-400 animate-pulse">ROUND WON</div>
     <div v-else class="text-lg invisible">.</div><!-- damit sich nicht alles verschiebt -->
     <div v-if="roundLostInfo" class="text-lg text-red-400 animate-pulse">ROUND LOST</div>
