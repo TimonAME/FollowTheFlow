@@ -188,11 +188,11 @@ onUnmounted(() => {
 <template>
   <div class="w-screen h-screen overflow-hidden flex justify-center flex-col items-center">
     <div>
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap justify-between">
         <button class="p-2 text-sm border-white border rounded hover:shadow-xl/20 shadow-white cursor-pointer" @click="returnToLobby">Return to lobby</button>
         <button class="p-2 text-sm border-white border-2 rounded hover:shadow-xl/20 shadow-white cursor-pointer" @click="resetGame">Restart</button>
       </div>
-      <div class="text-sm text-gray-500">press R to Restart</div>
+      <div class="text-sm text-gray-500 text-right">press R to Restart</div>
       <div class="flex flex-col text-end my-6">
         <div>{{ round }} - Round</div>
       </div>
