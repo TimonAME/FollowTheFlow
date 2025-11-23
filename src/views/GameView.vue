@@ -162,7 +162,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', () => {}) // funktioniert leider nicht
+  // TODO: funktioniert leider nicht
+  window.removeEventListener('keydown', () => {})
 })
 </script>
 
@@ -170,8 +171,8 @@ onUnmounted(() => {
   <div class="w-screen h-screen overflow-hidden flex justify-center flex-col items-center">
     <div>
       <div class="flex flex-wrap gap-2">
-        <button class="p-2 text-sm border-white border-2 rounded hover:shadow-xl/20 shadow-white cursor-pointer" @click="resetGame">Restart</button>
         <button class="p-2 text-sm border-white border rounded hover:shadow-xl/20 shadow-white cursor-pointer" @click="returnToLobby">Return to lobby</button>
+        <button class="p-2 text-sm border-white border-2 rounded hover:shadow-xl/20 shadow-white cursor-pointer" @click="resetGame">Restart</button>
       </div>
       <div class="text-sm text-gray-500">press R to Restart</div>
       <div class="flex flex-col text-end my-6">
@@ -198,9 +199,14 @@ onUnmounted(() => {
         </div>
       </div>
       <div class="mt-16 mx-auto text-center">
-        <button v-if="!waitingForInput" @click="loadGameString" class="p-4 border-white border-2 rounded hover:hover:shadow-[0px_0px_50px_8px_#ffffff] shadow-white transition-shadow" :class="{'animate-pulse': round === 1}">{{ round === 1 ? 'Start Game':'Next Round' }}</button>
+        <button v-if="!waitingForInput && !inputLoading" @click="loadGameString"
+                class="p-4 border-white border-2 rounded hover:hover:shadow-[0px_0px_50px_8px_#ffffff] shadow-white transition-shadow"
+                :class="{'animate-pulse': round === 1}">
+          {{ round === 1 ? 'Start Game':'Next Round' }}
+        </button>
         <div  v-if="!waitingForInput && !inputLoading" class="text-sm text-gray-500">or press ENTER</div>
-        <button v-if="waitingForInput" class="p-4 border-white border-2 rounded shadow-xl/20 shadow-white">Game in Progress</button>
+        <button v-if="inputLoading" class="p-4 border-white border-2 rounded shadow-xl/20 shadow-white">Log Playing</button>
+        <button v-if="waitingForInput && !inputLoading" class="p-4 border-white border-2 rounded shadow-xl/20 shadow-white">Repeat Combination</button>
       </div>
     </div>
 
