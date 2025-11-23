@@ -12,7 +12,7 @@ const rightAnimation = ref(false)
 const downAnimation = ref(false)
 const leftAnimation = ref(false)
 
-let gameString = ""
+let gameString = ''
 const round = ref(1);
 const inputString = ref("")
 const waitingForInput = ref(false)
@@ -20,9 +20,10 @@ const roundWonInfo = ref(false)
 const roundLostInfo = ref(false)
 const resetting = ref(false)
 const inputLoading = ref(false)
+let activeTimeouts =[]
 
 function createGameString() {
-  gameString = ""
+  gameString = ''
   for (let i = 0; i < round.value + 4; i++) {
     let rand = Math.floor(Math.random() * 4);
     gameString += templateString[rand]
@@ -57,39 +58,51 @@ function glow(direction) {
   }
 }
 
-function loadGameString() {
-  inputLoading.value = true
+function startNewGame(){
   resetGame()
-  if (waitingForInput.value) return;
-  resetting.value = false
+  loadGameString()
+}
 
+function loadGameString() {
+  if (waitingForInput.value || inputLoading.value) return;
+
+  // Alle laufenden Timeouts abbrechen
+  activeTimeouts.forEach(id => clearTimeout(id))
+  activeTimeouts = []
+
+  inputLoading.value = true
+  resetting.value = false
   inputString.value = ''
   roundWonInfo.value = false
   roundLostInfo.value = false
 
   let instructions = gameString.split('')
 
-  let timeouts = [];
   instructions.forEach((item, index) => {
     const id = setTimeout(() => {
       if (resetting.value) return;
       glow(item);
     }, 500 * index);
 
-    timeouts.push(id);
+    activeTimeouts.push(id);
   });
 
-  setTimeout(() => {
-    if (resetting.value) return; // for reset during show of input
+  const finalTimeout = setTimeout(() => {
+    if (resetting.value) return;
     waitingForInput.value = true
     inputLoading.value = false
   }, 500*instructions.length)
+
+  activeTimeouts.push(finalTimeout)
 }
 
 function addToInputString(input) {
+  if (!waitingForInput.value) return;
+
   inputString.value += input
 
   if (inputString.value.length === gameString.length) {
+    console.log("Lenght: inputstring == gamestring")
     waitingForInput.value = false
 
     if (inputString.value !== gameString ) {
@@ -102,7 +115,6 @@ function addToInputString(input) {
       glow("U");glow("R");glow("D");glow("L")
 
       round.value++
-
       createGameString()
     }
   }
@@ -116,10 +128,18 @@ function returnToLobby() {
 function resetGame() {
   resetting.value = true // initiate reset (info for other functions)
 
+  // Alle laufenden Timeouts abbrechen
+  activeTimeouts.forEach(id => clearTimeout(id))
+  activeTimeouts = []
+
   round.value = 1
   inputString.value = ''
   gameString = ''
   waitingForInput.value = false
+  inputLoading.value = false
+  roundWonInfo.value = false
+  roundLostInfo.value = false
+
   createGameString()
 }
 
@@ -128,41 +148,39 @@ onMounted(() => {
   resetting.value = false
 
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowUp') {
-      if (waitingForInput.value) {
+    if (waitingForInput.value) {
+      if (e.key === 'ArrowUp') {
         addToInputString("U")
         glow("U")
       }
-    }
-    else if (e.key === 'ArrowRight') {
-      if (waitingForInput.value) {
-        addToInputString("R")
-        glow("R")
+      else if (e.key === 'ArrowRight') {
+          addToInputString("R")
+          glow("R")
+      }
+      else if (e.key === 'ArrowDown') {
+          addToInputString("D")
+          glow("D")
+      }
+      else if (e.key === 'ArrowLeft') {
+          addToInputString("L")
+          glow("L")
       }
     }
-    else if (e.key === 'ArrowDown') {
-      if (waitingForInput.value) {
-        addToInputString("D")
-        glow("D")
-      }
+    if (e.key === 'Enter') {
+      if (!waitingForInput.value && !inputLoading.value && !roundLostInfo.value) loadGameString()
+      else if (!waitingForInput.value && !inputLoading.value && roundLostInfo.value) startNewGame()
     }
-    else if (e.key === 'ArrowLeft') {
-      if (waitingForInput.value) {
-        addToInputString("L")
-        glow("L")
-      }
-    }
-    else if (e.key === 'Enter') {
-      if (!waitingForInput.value && !inputLoading.value) loadGameString()
-    }
-    else if (e.key === 'r') {
+    if (e.key === 'r') {
       resetGame()
     }
   })
 })
 
 onUnmounted(() => {
-  // TODO: funktioniert leider nicht
+  // TODO: checken ob funktioniert
+  // Alle Timeouts beim Unmount abbrechen
+  activeTimeouts.forEach(id => clearTimeout(id))
+  activeTimeouts = []
   window.removeEventListener('keydown', () => {})
 })
 </script>
@@ -199,10 +217,14 @@ onUnmounted(() => {
         </div>
       </div>
       <div class="mt-16 mx-auto text-center">
-        <button v-if="!waitingForInput && !inputLoading" @click="loadGameString"
+        <button v-if="!waitingForInput && !inputLoading && !roundLostInfo" @click="loadGameString"
                 class="p-4 border-white border-2 rounded hover:hover:shadow-[0px_0px_50px_8px_#ffffff] shadow-white transition-shadow"
                 :class="{'animate-pulse': round === 1}">
           {{ round === 1 ? 'Start Game':'Next Round' }}
+        </button>
+        <button v-if="!waitingForInput && !inputLoading && roundLostInfo" @click="startNewGame"
+                class="p-4 border-white border-2 rounded hover:hover:shadow-[0px_0px_50px_8px_#ffffff] shadow-white transition-shadow">
+          New Game
         </button>
         <div  v-if="!waitingForInput && !inputLoading" class="text-sm text-gray-500">or press ENTER</div>
         <button v-if="inputLoading" class="p-4 border-white border-2 rounded shadow-xl/20 shadow-white">Log Playing</button>
