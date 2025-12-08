@@ -102,7 +102,7 @@ function addToInputString(input) {
   inputString.value += input
 
   if (inputString.value.length === gameString.length) {
-    console.log("Lenght: inputstring == gamestring")
+    //console.log("Lenght: inputstring == gamestring")
     waitingForInput.value = false
 
     if (inputString.value !== gameString ) {
