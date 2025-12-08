@@ -226,21 +226,20 @@ onUnmounted(() => {
                 class="p-4 border-white border-2 rounded hover:hover:shadow-[0px_0px_50px_8px_#ffffff] shadow-white transition-shadow">
           New Game
         </button>
-        <div  v-if="!waitingForInput && !inputLoading" class="text-sm text-gray-500">or press ENTER</div>
         <button v-if="inputLoading" class="p-4 border-white border-2 rounded shadow-xl/20 shadow-white">Log Playing</button>
         <button v-if="waitingForInput && !inputLoading" class="p-4 border-white border-2 rounded shadow-xl/20 shadow-white">Repeat Combination</button>
+        <div :class="!waitingForInput && !inputLoading ? 'block' : 'invisible'" class="text-sm text-gray-500">or press ENTER</div>
       </div>
     </div>
 
-    <div class="text-lg mt-16">Log:<span class="animate-pulse">_</span>{{ inputString }}</div>
+    <div class="text-lg mt-10">Log:<span class="animate-pulse">_</span>{{ inputString }}</div>
 
     <!-- Infos -->
-    <div v-if="roundWonInfo" class="text-lg text-green-400 animate-pulse">ROUND WON</div>
-    <div v-else class="text-lg invisible">.</div><!-- damit sich nicht alles verschiebt -->
-    <div v-if="roundLostInfo" class="text-lg text-red-400 animate-pulse">ROUND LOST</div>
-    <div v-else class="text-lg invisible">.</div>
-    <div v-if="resetting" class="text-lg text-yellow-400 animate-pulse">GAME RESETTED</div>
-    <div v-else class="text-lg invisible">.</div>
+    <div class="flex flex-row items-center gap-2 h-12">
+      <div v-if="roundWonInfo" class="text-lg text-green-400 animate-pulse">ROUND WON</div>
+      <div v-if="roundLostInfo" class="text-lg text-red-400 animate-pulse">ROUND LOST</div>
+      <div v-if="resetting" class="text-lg text-yellow-400 animate-pulse">GAME RESETTED</div>
+    </div>
   </div>
 </template>
 
